@@ -93,6 +93,7 @@ export const api = {
     ).toString();
     return request(`/api/attendance/logs${query ? `?${query}` : ''}`);
   },
+  getTodayAttendance: () => request('/api/attendance/today', { method: 'GET' }),
   markAttendance: (payload) => request('/api/attendance/mark', {
     method: 'POST',
     body: JSON.stringify(payload),

@@ -20,6 +20,32 @@ from ..dependencies import get_current_user, require_role
 router = APIRouter(prefix="/api/attendance", tags=["attendance"])
 
 
+@router.get("/today", response_model=Optional[AttendanceResponse])
+async def get_today_attendance(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get today's attendance record for the current user
+
+    Returns:
+        Attendance record for today if it exists, None otherwise
+    """
+    if not current_user.employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee record not found for current user",
+        )
+
+    today = date.today()
+    attendance = db.query(Attendance).filter(
+        Attendance.employee_id == current_user.employee.id,
+        Attendance.attendance_date == today,
+    ).first()
+
+    return attendance
+
+
 @router.post("/mark", response_model=AttendanceResponse)
 async def mark_attendance(
     request: AttendanceMarkRequest,

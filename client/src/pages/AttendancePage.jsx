@@ -21,6 +21,7 @@ const AttendancePage = () => {
   const [actionLoading, setActionLoading] = useState('');
   const [error, setError] = useState('');
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [todayAttendance, setTodayAttendance] = useState(null);
 
   const loadLogs = async () => {
     setLoading(true);
@@ -36,8 +37,18 @@ const AttendancePage = () => {
     }
   };
 
+  const loadTodayAttendance = async () => {
+    try {
+      const data = await api.getTodayAttendance();
+      setTodayAttendance(data);
+    } catch (err) {
+      setTodayAttendance(null);
+    }
+  };
+
   useEffect(() => {
     loadLogs();
+    loadTodayAttendance();
   }, []);
 
   const handleMarkAttendance = async (action) => {
@@ -52,6 +63,7 @@ const AttendancePage = () => {
     try {
       await api.markAttendance({ action });
       await loadLogs();
+      await loadTodayAttendance();
     } catch (err) {
       setError(err.message || 'Unable to update attendance.');
     } finally {
@@ -122,21 +134,31 @@ const AttendancePage = () => {
           <p className="text-sm text-slate-500 mt-1">Live attendance logs from the EmPay backend.</p>
         </div>
         <div className="flex gap-3">
-          <Button 
-            onClick={() => handleMarkAttendance('check_in')} 
-            disabled={Boolean(actionLoading)} 
-            className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 rounded-xl px-6 h-11 font-semibold transition-all active:scale-95"
-          >
-            {actionLoading === 'check_in' ? 'Checking in...' : 'Check In'}
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => handleMarkAttendance('check_out')} 
-            disabled={Boolean(actionLoading)} 
-            className="border-primary/20 hover:bg-primary/5 text-primary rounded-xl px-6 h-11 font-semibold transition-all active:scale-95"
-          >
-            {actionLoading === 'check_out' ? 'Checking out...' : 'Check Out'}
-          </Button>
+          {(!todayAttendance || !todayAttendance.check_in_time) && (
+            <Button
+              onClick={() => handleMarkAttendance('check_in')}
+              disabled={Boolean(actionLoading)}
+              className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 rounded-xl px-6 h-11 font-semibold transition-all active:scale-95"
+            >
+              {actionLoading === 'check_in' ? 'Checking in...' : 'Check In'}
+            </Button>
+          )}
+          {todayAttendance && todayAttendance.check_in_time && !todayAttendance.check_out_time && (
+            <Button
+              variant="outline"
+              onClick={() => handleMarkAttendance('check_out')}
+              disabled={Boolean(actionLoading)}
+              className="border-primary/20 hover:bg-primary/5 text-primary rounded-xl px-6 h-11 font-semibold transition-all active:scale-95"
+            >
+              {actionLoading === 'check_out' ? 'Checking out...' : 'Check Out'}
+            </Button>
+          )}
+          {todayAttendance && todayAttendance.check_in_time && todayAttendance.check_out_time && (
+            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl">
+              <CheckCircle2 className="h-5 w-5" />
+              Checked Out
+            </div>
+          )}
         </div>
       </div>
 

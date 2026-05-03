@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { IndianRupee, CheckCircle, FileText, TrendingUp, AlertCircle, Download } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useAuth } from '@/lib/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const currency = new Intl.NumberFormat('en-IN', {
@@ -12,6 +13,7 @@ const currency = new Intl.NumberFormat('en-IN', {
 });
 
 const PayrollDashboard = () => {
+  const { user } = useAuth();
   const [payruns, setPayruns] = useState([]);
   const [payslips, setPayslips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,9 +83,11 @@ const PayrollDashboard = () => {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Payroll Dashboard</h1>
           <p className="text-sm text-slate-500 mt-1">Manage payroll cycles and employee compensation</p>
         </div>
-        <Button onClick={runPayroll} disabled={running} className="bg-blue-600 hover:bg-blue-700">
-          {running ? 'Running...' : 'Run Payroll'}
-        </Button>
+        {(user?.role === 'Admin' || user?.role === 'Payroll Officer') && (
+          <Button onClick={runPayroll} disabled={running} className="bg-blue-600 hover:bg-blue-700">
+            {running ? 'Running...' : 'Run Payroll'}
+          </Button>
+        )}
       </div>
 
       {error && (

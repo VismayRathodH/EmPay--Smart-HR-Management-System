@@ -99,10 +99,13 @@ class EmployeeCreate(EmployeeBase):
 
 
 class EmployeeUpdate(BaseModel):
+    employee_code: Optional[str] = None
     designation: Optional[str] = None
     department: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
+    date_of_joining: Optional[datetime] = None
     ctc: Optional[float] = None
     wage: Optional[float] = None
     basic_salary: Optional[float] = None
