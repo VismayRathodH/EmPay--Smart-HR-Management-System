@@ -1,0 +1,12 @@
+{
+  "name": "empay-full-stack",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd EmPay--Smart-HR-Management-System/EmPay--Smart-HR-Management-System && python -m venv venv && call venv\\Scripts\\activate.bat && pip install -r server/requirements.txt && python -m server.main",
+    "dev:frontend": "cd client && npm install && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

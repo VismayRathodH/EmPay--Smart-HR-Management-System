@@ -6,7 +6,6 @@ import {
   CalendarCheck,
   CalendarOff,
   Banknote,
-  Search,
   Bell,
   Settings,
   HelpCircle,
@@ -122,15 +121,7 @@ function Layout({ children }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 flex items-center justify-between px-8 bg-white/70 backdrop-blur-md border-b sticky top-0 z-10">
-          <div className="w-96 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search analytics or employees..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border-transparent rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none"
-            />
-          </div>
+        <header className="h-16 flex items-center justify-end px-8 bg-white/70 backdrop-blur-md border-b sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <button className="text-slate-400 hover:text-slate-600 transition-colors">
               <Bell className="h-5 w-5" />
