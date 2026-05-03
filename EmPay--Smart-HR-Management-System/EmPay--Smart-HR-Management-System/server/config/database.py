@@ -1,0 +1,29 @@
+import os
+from pathlib import Path
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+# Database configuration - place empay.db in project root
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+DATABASE_URL = f"sqlite:///{PROJECT_ROOT}/empay.db"
+
+# Create engine
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    echo=False
+)
+
+# Create session factory
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Base class for models
+Base = declarative_base()
+
+# Dependency for getting DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
