@@ -7,8 +7,9 @@ echo "================================"
 echo ""
 
 # Check if running from correct directory
-if [ ! -f "server/seed_db.py" ]; then
+if [ ! -f "EmPay--Smart-HR-Management-System/EmPay--Smart-HR-Management-System/server/seed_db.py" ]; then
     echo "❌ Error: Please run this script from the project root directory"
+    echo "Expected to find: EmPay--Smart-HR-Management-System/EmPay--Smart-HR-Management-System/server/seed_db.py"
     exit 1
 fi
 
@@ -29,17 +30,18 @@ echo "🔄 Activating virtual environment..."
 source venv/bin/activate
 
 # Install requirements if needed
-if [ ! -f "venv/pyvenv.cfg" ]; then
-    echo "📥 Installing requirements..."
-    pip install -r server/requirements.txt
-fi
+echo "📥 Installing dependencies..."
+pip install -q -r EmPay--Smart-HR-Management-System/EmPay--Smart-HR-Management-System/server/requirements.txt
 
-# Run the seed script
+# Navigate to nested directory and run the seed script
 echo ""
 echo "🌱 Seeding database with sample data..."
+cd EmPay--Smart-HR-Management-System/EmPay--Smart-HR-Management-System
 python -m server.seed_db
+SEED_RESULT=$?
+cd ../../
 
-if [ $? -eq 0 ]; then
+if [ $SEED_RESULT -eq 0 ]; then
     echo ""
     echo "✅ Database seeding completed successfully!"
     echo ""

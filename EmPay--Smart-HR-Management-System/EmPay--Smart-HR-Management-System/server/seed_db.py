@@ -2,12 +2,23 @@
 Seed database with 500-600 employee records for testing and demonstration
 """
 import random
+import sys
+from pathlib import Path
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
+import io
 
-from config.database import SessionLocal, engine
-from models import Base, User, UserRole, Employee, Attendance, LeaveBalance
-from utils.security import hash_password
+# Set stdout to UTF-8 encoding for Windows compatibility
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from server.config.database import SessionLocal, engine
+from server.models import Base, User, UserRole, Employee, Attendance, LeaveBalance
+from server.utils.security import hash_password
 
 # Sample data
 DEPARTMENTS = ['Engineering', 'HR', 'Marketing', 'Payroll', 'Sales', 'Operations', 'Finance', 'Design']
@@ -48,8 +59,12 @@ def generate_bank_account():
     """Generate random bank account number"""
     return str(random.randint(10000000000000000, 99999999999999999))
 
-def seed_database():
-    """Populate database with sample employees"""
+def seed_database(reset=False):
+    """Populate database with sample employees
+
+    Args:
+        reset: If True, clear existing data before seeding
+    """
     db = SessionLocal()
 
     try:
@@ -59,8 +74,19 @@ def seed_database():
         # Count existing users to avoid duplicates
         existing_count = db.query(User).count()
 
+        if reset and existing_count > 0:
+            print("Clearing existing data...")
+            db.query(Attendance).delete()
+            db.query(LeaveBalance).delete()
+            db.query(Employee).delete()
+            db.query(User).delete()
+            db.commit()
+            existing_count = 0
+            print("[OK] Data cleared")
+
         if existing_count > 0:
             print(f"Database already has {existing_count} users. Skipping seed.")
+            print("To reset and reseed, use: python -m server.seed_db --reset")
             return
 
         print("Starting database seed with 550 employees...")
@@ -75,7 +101,7 @@ def seed_database():
         )
         db.add(admin_user)
         db.commit()
-        print("✓ Created admin user")
+        print("[OK] Created admin user")
 
         # Create employees
         total_employees = 550
@@ -136,7 +162,7 @@ def seed_database():
                 batch_employees.append(employee)
 
             db.commit()
-            print(f"✓ Created employees {batch_num + 1} to {batch_num + current_batch_size}")
+            print(f"[OK] Created employees {batch_num + 1} to {batch_num + current_batch_size}")
 
         # Create leave balances for all employees
         print("\nCreating leave balances...")
@@ -154,7 +180,7 @@ def seed_database():
             db.add(leave_balance)
 
         db.commit()
-        print(f"✓ Created leave balances for {len(employees)} employees")
+        print(f"[OK] Created leave balances for {len(employees)} employees")
 
         # Create sample attendance records
         print("\nCreating sample attendance records...")
@@ -182,9 +208,9 @@ def seed_database():
                     attendance_count += 1
 
         db.commit()
-        print(f"✓ Created {attendance_count} attendance records")
+        print(f"[OK] Created {attendance_count} attendance records")
 
-        print(f"\n✅ Database seeding completed!")
+        print(f"\n[SUCCESS] Database seeding completed!")
         print(f"   - Total Users: {db.query(User).count()}")
         print(f"   - Total Employees: {db.query(Employee).count()}")
         print(f"   - Total Leave Balances: {db.query(LeaveBalance).count()}")
@@ -192,11 +218,13 @@ def seed_database():
 
     except Exception as e:
         db.rollback()
-        print(f"❌ Error seeding database: {str(e)}")
+        print(f"[ERROR] Error seeding database: {str(e)}")
         import traceback
         traceback.print_exc()
     finally:
         db.close()
 
 if __name__ == "__main__":
-    seed_database()
+    import sys
+    reset = "--reset" in sys.argv or "-r" in sys.argv
+    seed_database(reset=reset)

@@ -7,8 +7,9 @@ echo ================================
 echo.
 
 REM Check if running from correct directory
-if not exist "server\seed_db.py" (
+if not exist "EmPay--Smart-HR-Management-System\EmPay--Smart-HR-Management-System\server\seed_db.py" (
     echo Error: Please run this script from the project root directory
+    echo Expected to find: EmPay--Smart-HR-Management-System\EmPay--Smart-HR-Management-System\server\seed_db.py
     pause
     exit /b 1
 )
@@ -24,16 +25,20 @@ echo Activating virtual environment...
 call venv\Scripts\activate.bat
 
 REM Install requirements if needed
-pip install -q -r server\requirements.txt
+echo Installing dependencies...
+pip install -q -r EmPay--Smart-HR-Management-System\EmPay--Smart-HR-Management-System\server\requirements.txt
 
-REM Run the seed script
+REM Change to the nested directory and run the seed script
 echo.
 echo Seeding database with sample data...
+cd EmPay--Smart-HR-Management-System\EmPay--Smart-HR-Management-System
 python -m server.seed_db
+set SEED_RESULT=%ERRORLEVEL%
+cd ..\..\
 
-if %ERRORLEVEL% EQU 0 (
+if %SEED_RESULT% EQU 0 (
     echo.
-    echo Database seeding completed successfully!
+    echo ✅ Database seeding completed successfully!
     echo.
     echo You can now login with:
     echo   Email: admin@empay.com
@@ -46,7 +51,7 @@ if %ERRORLEVEL% EQU 0 (
     pause
 ) else (
     echo.
-    echo Database seeding failed!
+    echo ❌ Database seeding failed!
     pause
     exit /b 1
 )
